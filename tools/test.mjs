@@ -32,7 +32,7 @@ ok(W.droplets.length > 40, 'droplets placed', W.droplets.length);
 ok(W.shelter(W.leaves[0].x, W.leaves[0].y - 5, W.leaves[0].z) === 1, 'under a leaf is sheltered');
 const hOpen = W.humidity(0, W.height(0, 0), 0, { lightsOn: true }), hLeaf = W.humidity(W.leaves[3].x, W.leaves[3].y - 10, W.leaves[3].z, { lightsOn: true });
 ok(hLeaf > hOpen, 'humidity higher under a leaf than in the open', hOpen.toFixed(2) + ' < ' + hLeaf.toFixed(2));
-const downwind = W.fruitOdor(b.x + 0.28 * 40 / 1.04, b.z - 40 / 1.04, 1), upwind = W.fruitOdor(b.x - 0.28 * 40 / 1.04, b.z + 40 / 1.04, 1);
+const downwind = W.plume(b.x + 0.28 * 40 / 1.04, b.z - 40 / 1.04, b.x, b.z, 0.6, 1), upwind = W.plume(b.x - 0.28 * 40 / 1.04, b.z + 40 / 1.04, b.x, b.z, 0.6, 1);
 ok(downwind > 5 * upwind, 'fruit plume extends downwind', downwind.toFixed(3) + ' vs ' + upwind.toFixed(4));
 
 // --------------------------------------------------------------------------------------------- fly
