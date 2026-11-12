@@ -134,7 +134,7 @@ js/ear/               the female's ears: ear-net.js (FlyHarp's EarNet), female-e
 js/render/            three.js r181 (vendored): toon shading, scene, near-field detail, actors, FlyHarp hook
 js/audio.js           Web Audio: true-pitch song, her brain's chord, loom drone, frog calls
 data/                 ear.json + ear.bin (FlyWire auditory network, from FlyHarp), fly.json (flyvis columns, from FlyHarp), song-model.json (from Opulation)
-tools/test.mjs        36 headless checks (npm test)
+tools/test.mjs        39 headless checks (npm test)
 tools/smoke.mjs       headless Chrome: loads the game, fails on console errors, writes screenshots to shots/
 ```
 
