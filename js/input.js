@@ -70,7 +70,7 @@ export class Input {
       rub: edge('w') || edge('ArrowUp') || edge('rub'),
       pulse: edge('j') || edge('mouse0') || edge('pulse'),
       humDown: edge('k') || edge('mouse2') || edge('hum'), humUp: U.has('k') || U.has('mouse2') || U.has('hum'),
-      view: edge('v'), help: edge('h') || edge('help'), pause: edge('p') || edge('Escape'), mute: edge('m'),
+      view: edge('v'), help: edge('h') || edge('help'), pause: edge('p') || edge('pause'), mute: edge('m'),
     };
     out.stamps = this.stamps; this.stamps = { pulse: [], humDown: [], humUp: [] };
     this.look.dx = this.look.dy = 0; E.clear(); U.clear();

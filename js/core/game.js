@@ -64,7 +64,7 @@ export class Game {
     this.say('You tumble out of the keeper\'s cup into a forest the size of a cathedral. You are 2.5 mm long. You cannot fly.', 'story', 7);
   }
   get npcs() { return [...this.females, this.rival, ...this.siblings]; }
-  get prey() { return [this.player, ...this.npcs.filter(n => n.alive && !n.copulating)]; }
+  get prey() { return [...(this.won ? [] : [this.player]), ...this.npcs.filter(n => n.alive && !n.copulating && !(this.won && this.won.female === n))]; }
   say(text, kind = 'info', dur = 4) { this.messages.push({ text, kind, t: this.simT, dur }); if (this.messages.length > 30) this.messages.shift(); }
 
   /** input: {fwd, strafe, run, jump, look:{dx,dy}, act, groom (toggle), sweepL, sweepR, rub, pulse, humDown, humUp}

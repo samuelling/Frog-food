@@ -123,7 +123,7 @@ function frame() {
   if (!running) { t += dt; renderOnly(dt); return; }
   const inp = input.read();
   if (inp.help) toggleHelp();
-  if (inp.pause && mobile) setPaused(!paused);
+  if (inp.pause) { setPaused(!paused); if (!paused && !mobile) lock(); }
   if (inp.mute) { audio.mute = !audio.mute; audio.setVolume(audio.mute ? 0 : 0.8); }
   if (inp.view) { eyeView = !eyeView; flyharp.enable(eyeView || flyharp.workers.length > 0); $('eyepip').classList.toggle('hidden', !eyeView); }
   if (paused || helpOpen) { renderOnly(0); return; }
