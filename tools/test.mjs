@@ -1,7 +1,6 @@
 // Headless checks of FrogFood's logic: node tools/test.mjs
 // (The renderer and audio are checked separately in a headless browser: tools/smoke.mjs.)
 import fs from 'fs';
-import { createRequire } from 'module';
 import { World } from '../js/core/world.js';
 import { FlyBody } from '../js/core/fly.js';
 import { Frog, FROG } from '../js/core/frog.js';
@@ -16,7 +15,6 @@ import { FemaleEar } from '../js/ear/female-ear.js';
 import { TIME, PHYS } from '../js/core/scale.js';
 import { FlyEye } from '../js/render/eyesample.js';
 
-const require = createRequire(import.meta.url);
 const ROOT = new URL('..', import.meta.url).pathname;
 let fails = 0, passes = 0;
 function ok(cond, msg, extra = '') { if (cond) { passes++; console.log('  ok   ' + msg + (extra ? '  ' + extra : '')); } else { fails++; console.log('  FAIL ' + msg + (extra ? '  ' + extra : '')); } }
@@ -98,7 +96,8 @@ function hunt(moving, dist = 40) {
 section('song and the Tonnectome');
 const M = JSON.parse(fs.readFileSync(ROOT + 'data/song-model.json'));
 const meta = JSON.parse(fs.readFileSync(ROOT + 'data/ear.json')); const bin = fs.readFileSync(ROOT + 'data/ear.bin');
-const EarNet = require(ROOT + 'js/ear/ear-net.js');
+// ear-net.js is FlyHarp's classic (UMD) script; load it the way the worker does
+const EarNet = (() => { const mod = { exports: {} }; new Function('module', fs.readFileSync(ROOT + 'js/ear/ear-net.js', 'utf8'))(mod); return mod.exports; })();
 const ear = new FemaleEar(EarNet, meta, bin.buffer.slice(bin.byteOffset, bin.byteOffset + bin.length), M);
 function perform(tapMs, seconds, opts = {}) {
   const S = new SongAdapter(5); S.setCondition({ jitter: opts.jitter ?? 0.002 });

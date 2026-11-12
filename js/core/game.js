@@ -102,9 +102,12 @@ export class Game {
     // --- the song: commit it, and mix every singer into the air
     const wingDust = this.groom.dust.wings, en = this.stats.energy;
     this.song.setCondition({ jitter: 0.0025 + 0.004 * wingDust + 0.002 * (1 - en), amp: 0.9 * (1 - 0.45 * wingDust) * (0.6 + 0.4 * en) });
-    if (input.pulse) this.song.tap(this.songNow);
-    if (input.humDown) this.song.humOn(this.songNow);
-    if (input.humUp) this.song.humOff(this.songNow);
+    // song input: event-timed if the caller provides times (the browser does), else now
+    const songIn = [];
+    if (input.pulseTimes) for (const t of input.pulseTimes) songIn.push([t, 'tap']); else if (input.pulse) songIn.push([this.songNow, 'tap']);
+    if (input.humDownTimes) for (const t of input.humDownTimes) songIn.push([t, 'on']); else if (input.humDown) songIn.push([this.songNow, 'on']);
+    if (input.humUpTimes) for (const t of input.humUpTimes) songIn.push([t, 'off']); else if (input.humUp) songIn.push([this.songNow, 'off']);
+    if (!this.dead) for (const [t, k] of songIn.sort((a, b) => a[0] - b[0])) { if (k === 'tap') this.song.tap(t); else if (k === 'on') this.song.humOn(t); else this.song.humOff(t); }
     const mine = this.song.commit(this.songNow);
     const rivals = this.rival.alive ? this.rival.song.commit(this.songNow) : [];
     const newAir = [...mine.map(p => ({ ...p, who: 0 })), ...rivals.map(p => ({ ...p, who: 1 }))].sort((a, b) => a.t - b.t);
@@ -214,11 +217,12 @@ export class Game {
     // --- courtship
     for (const e of this.court.update(dt, { fly: F, player: this.player, females: this.females, feat: this.myFeat })) {
       ev.push(e);
-      if (e.type === 'court-start') { this.say(e.female.mated ? 'A female. Something about her smells of another male (cVA).' : 'A female. Your P1 neurons light up.', 'story', 3); }
+      if (e.type === 'stage') this._courtBest = Math.max(this._courtBest || 0, this.court.index);
+      if (e.type === 'court-start') { this._courtBest = 0; this._met = this._met || new Map(); const seen = this._met.get(e.female.id); this._met.set(e.female.id, this.simT); if (seen === undefined || this.simT - seen > 25) this.say(e.female.mated ? 'A female. Something about her smells of another male (cVA).' : 'A female. Your P1 neurons light up.', 'story', 3); }
       if (e.type === 'stage' && e.stage === 'follow') this.say('Follow her.', 'hint', 2);
       if (e.type === 'stage' && e.stage === 'tap') this.say('Close in and tap her (E).', 'hint', 2.5);
       if (e.type === 'stage' && e.stage === 'lick') this.say('She is slowing down for you. Get behind her and lick (E).', 'hint', 3);
-      if (e.type === 'court-end') this.say(e.why === 'lost' ? 'You lost her.' : e.why === 'taken' ? 'She is with another male now.' : 'She is gone.', 'warn', 2.5);
+      if (e.type === 'court-end' && (e.why !== 'lost' || this._courtBest >= 1)) this.say(e.why === 'lost' ? 'You lost her.' : e.why === 'taken' ? 'She is with another male now.' : 'She is gone.', 'warn', 2.5);
     }
     // the male courtship circuit (schematic), driven by what is happening
     this.tasteTimer = Math.max(0, this.tasteTimer - dt);

@@ -31,6 +31,7 @@ export class FemaleEar {
   /** run the network up to song tick `now` (minus the pulse envelope's reach). gain: level at her antennae */
   advanceTo(now, gain = 1) {
     const M = this.M, F = M.dtTicks, safe = now - M.envOff, out = this.last;
+    if (safe - this.framer.n * F > 8000) this.skipTo(now - 2000);          // fell behind (a hidden tab): jump, do not crawl
     let n = 0, dsum = 0, vsum = 0; const asum = new Float32Array(AREAS.length);
     while ((this.framer.n + 1) * F <= safe && n < 400) {
       const fr = this.framer.next(this.sch).f;

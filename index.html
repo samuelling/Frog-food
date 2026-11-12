@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+<title>FrogFood</title>
+<meta name="description" content="A short life as a flightless male fruit fly in a dart-frog vivarium. The only way to win is to breed.">
+<link rel="stylesheet" href="css/style.css">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Ctext y=%22.9em%22 font-size=%2290%22%3E%F0%9F%90%B8%3C/text%3E%3C/svg%3E">
+</head>
+<body>
+<canvas id="view"></canvas>
+
+<div id="fx-dust" class="fx"></div>
+<div id="fx-loom" class="fx"></div>
+<div id="fx-slow" class="fx"></div>
+<div id="fx-trap" class="fx"></div>
+
+<div id="hud" class="hidden">
+  <div id="hud-life" class="panel">
+    <div class="row"><b id="h-day">Day 1</b> <span id="h-clock">07:40</span> <span id="h-light" title="LED bar">☀</span></div>
+    <div class="row small">age <span id="h-age">0 h</span> <span class="bar thin"><i id="h-lifebar"></i></span></div>
+    <div class="row"><span class="lbl">water</span><span class="bar"><i id="h-water" class="water"></i></span></div>
+    <div class="row"><span class="lbl">sugar</span><span class="bar"><i id="h-energy" class="energy"></i></span></div>
+    <div class="row"><span class="lbl">humidity</span><span class="bar"><i id="h-hum" class="hum"></i></span> <span id="h-shelter" class="tag">sheltered</span></div>
+  </div>
+  <div id="hud-missions" class="panel"><div class="title">Life goals</div><ul id="h-missions"></ul></div>
+  <div id="hud-senses" class="panel">
+    <div class="title">Antennae <span id="h-dulled" class="tag warn">dusty</span></div>
+    <div class="sense"><span class="lbl">vinegar</span><span class="lr"><i id="h-fruitL"></i><i id="h-fruitR"></i></span></div>
+    <div class="sense"><span class="lbl">female</span><span class="lr"><i id="h-femL"></i><i id="h-femR"></i></span> <span id="h-cva" class="tag warn">cVA</span></div>
+    <div class="sense"><span class="lbl">airflow</span><span id="h-wind" class="arrow">↑</span></div>
+    <div class="title" style="margin-top:6px">Looming <span class="small">(LPLC2 → giant fibre)</span></div>
+    <div class="row"><span class="bar"><i id="h-loom" class="loom"></i></span> <span id="h-gf" class="tag danger">GF</span></div>
+  </div>
+  <div id="hud-court" class="panel hidden">
+    <div class="title">Courtship <span id="c-name" class="small"></span></div>
+    <div id="c-stages"></div>
+    <div id="c-how" class="small how"></div>
+    <div class="cols">
+      <div>
+        <div class="row"><span class="lbl">her receptivity</span><span class="bar"><i id="c-R" class="recept"></i></span></div>
+        <div class="row small"><span id="c-vpo" class="tag">vaginal plate closed</span> <span id="c-ovi" class="tag warn">ovipositor out</span></div>
+        <div class="row"><span class="lbl">your song</span> <span id="c-ipi" class="mono">— ms</span> <span id="c-cv" class="mono small"></span> <span id="c-sine" class="mono small"></span></div>
+        <div class="row"><span class="lbl">sounds like a male</span><span class="bar"><i id="c-q" class="q"></i></span></div>
+        <div class="row small" id="c-dist"></div>
+      </div>
+      <div>
+        <div class="small sub">her ears (Tonnectome, FlyWire)</div>
+        <div id="c-ears"></div>
+        <div class="small sub">your circuit (schematic)</div>
+        <div id="c-male"></div>
+      </div>
+    </div>
+  </div>
+  <div id="hud-groom" class="panel hidden">
+    <div class="title">Grooming <span class="small">— head first (Seeds et al. 2014)</span></div>
+    <div id="g-parts"></div>
+    <div class="row small"><span class="lbl">front legs</span><span class="bar thin"><i id="g-front" class="clog"></i></span></div>
+    <div class="row small"><span class="lbl">hind legs</span><span class="bar thin"><i id="g-hind" class="clog"></i></span></div>
+    <div class="small how">Alternate <b>A</b> / <b>D</b> (or ◀ ▶) to sweep. <b>W</b> rubs your legs together when they clog. <b>G</b> to stop.</div>
+  </div>
+  <div id="prompt"></div>
+  <div id="toasts"></div>
+  <canvas id="eyepip" width="180" height="180" class="hidden" title="What your 721 ommatidia see (FlyHarp input)"></canvas>
+</div>
+
+<div id="touch" class="hidden">
+  <div id="stick"><div id="knob"></div></div>
+  <div id="lookpad"></div>
+  <div id="tbtns">
+    <button data-key="jump" class="big">Jump</button>
+    <button data-key="act">E</button>
+    <button data-key="run">Run</button>
+    <button data-key="groom">Groom</button>
+    <button data-key="pulse" class="song">♪ Pulse</button>
+    <button data-key="hum" class="song">~ Hum</button>
+  </div>
+  <div id="tgroom" class="hidden">
+    <button data-key="sweepL">◀</button><button data-key="rub">Rub</button><button data-key="sweepR">▶</button>
+  </div>
+  <button id="tpause" data-key="pause">II</button>
+</div>
+
+<div id="start" class="screen">
+  <div class="card">
+    <h1>FrogFood</h1>
+    <p class="lede">You are a male <i>Drosophila melanogaster</i>, 2.5 mm long, from a strain bred not to fly. The keeper has just tipped you, dusted in calcium powder, into a dart-frog vivarium: to you, a cathedral forest 300 m wide and 400 m tall, where 20-metre frogs hunt by motion.</p>
+    <p>Your life will be short. Drink, eat, keep damp, don't move when something vast is watching. <b>The only way to win is to breed.</b></p>
+    <div class="controls">
+      <div><b>Mouse</b> look · <b>WASD</b> walk · <b>Shift</b> run · <b>Space</b> jump (or struggle free)</div>
+      <div><b>E</b> drink / eat / tap / lick / mount · <b>G</b> groom (then <b>A</b>/<b>D</b> sweep, <b>W</b> rub legs)</div>
+      <div><b>Click</b> or <b>J</b>: tap the pulse-song tempo (≈170 taps/min = 35 ms) · hold <b>right-click</b> or <b>K</b>: sine hum</div>
+      <div><b>V</b> fly-eye view · <b>H</b> help · <b>P</b> pause · <b>M</b> mute</div>
+    </div>
+    <label class="opt"><input type="checkbox" id="opt-oct"> Song an octave or two up (phone / laptop speakers can't play 155-270 Hz well)</label>
+    <button id="go" class="go">Begin</button>
+    <p class="small muted">Sound matters: the song is your courtship. Headphones help. Real connectome model: the female's ears (FlyWire auditory network via FlyHarp's Tonnectome). Schematic: your courtship circuit, the looming detector, her song preference. <a href="https://github.com/samuelling/Frog-food#readme" target="_blank">How it works</a></p>
+    <p id="loading" class="small muted">Loading the female's ears (4,222 neurons)…</p>
+  </div>
+</div>
+<div id="end" class="screen hidden"><div class="card"><h1 id="end-title"></h1><p id="end-text"></p><div id="end-stats" class="small"></div><button id="again" class="go">Live again</button></div></div>
+<div id="help" class="screen hidden"><div class="card wide" id="help-body"></div></div>
+<div id="paused" class="screen hidden"><div class="card"><h1>Paused</h1><p>Click to resume.</p></div></div>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

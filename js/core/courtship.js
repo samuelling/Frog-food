@@ -35,7 +35,7 @@ export class Courtship {
       for (const f of ctx.females) {
         if (!f.alive || f.copulating) continue;
         const g = geometry(fly, f);
-        if (g.dist < 16 && Math.abs(g.az) < 0.5) { this.female = f; this._set('orient', ev, { female: f }); ev.push({ type: 'court-start', female: f }); break; }
+        if (g.dist < 12 && Math.abs(g.az) < 0.45) { this.female = f; this._set('orient', ev, { female: f }); ev.push({ type: 'court-start', female: f }); break; }
       }
       return ev;
     }
