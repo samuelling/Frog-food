@@ -165,7 +165,8 @@ export class World {
     return c * (0.3 + 0.7 * fil * fil);
   }
   // fermenting fruit: acetic acid + ethanol from the banana and its yeast
-  fruitOdor(x, z, t) { let c = 0; for (const b of this.bananas) c += this.plume(x, z, b.x, b.z, 0.6, t); return c; }
+  // plus a faint diffuse halo (slow eddies and diffusion near the source), so the last few cm can be found by gradient
+  fruitOdor(x, z, t) { let c = 0; for (const b of this.bananas) c += this.plume(x, z, b.x, b.z, 0.6, t) + 0.12 * Math.exp(-Math.hypot(x - b.x, z - b.z) / 45); return c; }
 
   addDroplet(x, z, r) {
     const s = this.surface(x, z);

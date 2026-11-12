@@ -152,7 +152,12 @@ function handleEvents(ev) {
   const F = game.fly, dist = p => Math.hypot(p.x - F.pos.x, p.z - F.pos.z);
   for (const e of ev) {
     switch (e.type) {
-      case 'pulses': for (const p of e.pulses) audio.pulse(p.t, p.amp ?? 0.8, e.who ? Math.max(-1, Math.min(1, (e.at.x - F.pos.x) / 10)) * 0.6 : 0); if (!e.who) self.buzz = 1; break;
+      case 'pulses': {
+        // your own song at full level; the rival's fades with distance (song is near-field)
+        const att = e.who ? 1 / (1 + (dist(e.at) / 12) ** 2) : 1, pan = e.who ? Math.max(-1, Math.min(1, (e.at.x - F.pos.x) / 10)) * 0.6 : 0;
+        if (att > 0.02) for (const p of e.pulses) audio.pulse(p.t, (p.amp ?? 0.8) * att, pan);
+        if (!e.who) self.buzz = 1; break;
+      }
       case 'land': if (e.frog) { const d = dist(e.at); audio.thump(d, e.mass); shake = Math.max(shake, Math.min(1, 6 / (1 + d / 10))); } break;
       case 'strike': if (e.frog) audio.whoosh(e.target === game.player ? 1 : 0.3); break;
       case 'notice': if (e.frog && e.target === game.player) audio.call(e.frog.species, dist(e.frog.pos)); break;

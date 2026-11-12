@@ -51,7 +51,7 @@ export class FlyBody {
     const p = { x: nx, z: nz };
     if (W.collide(p)) ev.push({ type: 'bump' });
     let s = W.surface(p.x, p.z);
-    const limit = this.onGround ? this.pos.y + PHYS.climb : this.pos.y + 0.3;
+    const limit = this.onGround ? this.pos.y + PHYS.climb : this.pos.y + 2.0;   // in the air, legs still catch an edge a little above
     if (s.y > limit || (this.onGround && s.kind === 'water')) {
       // try sliding along each axis
       const a = { x: p.x, z: this.pos.z }, b = { x: this.pos.x, z: p.z };
@@ -66,6 +66,7 @@ export class FlyBody {
       if (s.y < this.pos.y - 1.2) { this.onGround = false; this.airTime = 0; }       // walked off an edge
       else { this.pos.y = s.y; this.ground = s.kind; }
     }
+    if (!this.onGround && this.airTime > 0.02 && s.y > this.pos.y + 0.3 && s.y <= this.pos.y + 2.0) { this.pos.y = s.y; this.onGround = true; this.ground = s.kind; this.vel.y = 0; this.vel.x *= 0.3; this.vel.z *= 0.3; this.sinceLand = 0; ev.push({ type: 'land', impact: 0, kind: s.kind }); }
     if (!this.onGround) {
       this.pos.y += this.vel.y * dt;
       if (this.pos.y <= s.y && this.vel.y <= 0) {

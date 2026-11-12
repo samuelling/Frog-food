@@ -60,6 +60,22 @@ section('fly body');
   W.droplets.splice(W.droplets.indexOf(d2), 1);
 }
 
+{
+  // feeding: walk to the dish, jump onto the banana, eat
+  const g = new Game({ seed: 7, frogs: 0, siblings: 0 }); g.rival.alive = false;
+  const b = g.world.bananas[0], F = g.fly;
+  F.pos.x = b.x; F.pos.z = b.z + b.r + 4; F.pos.y = g.world.height(F.pos.x, F.pos.z); F.onGround = true; F.vel.y = 0; F.yaw = 0;   // facing -z, towards the banana
+  let on = false; for (let i = 0; i < 240 && !on; i++) { g.update(1 / 60, { fwd: 1, jump: i === 20 || i === 80 || i === 140 }); on = F.ground === 'banana'; }
+  ok(on, 'jumping onto the banana slice (7 mm) works');
+  const e0 = g.stats.energy; g.update(1 / 60, { act: true }); for (let i = 0; i < 300; i++) g.update(1 / 60, {});
+  ok(g.stats.energy > e0 + 0.3, 'pressing E on the banana feeds you', (g.stats.energy - e0).toFixed(2));
+  // drinking at a droplet
+  const d = g.world.addDroplet(0, 0, 1.0); F.pos.x = 0; F.pos.z = 2.0; F.pos.y = g.world.height(0, 2); F.onGround = true; F.yaw = 0;
+  for (let i = 0; i < 30; i++) g.update(1 / 60, { fwd: 0.5 });
+  const w0 = g.stats.water; g.update(1 / 60, { act: true }); for (let i = 0; i < 120; i++) g.update(1 / 60, {});
+  ok(g.stats.water > w0 + 0.2 && d.r < 1, 'pressing E at a droplet drinks it (and it shrinks)', (g.stats.water - w0).toFixed(2) + ' / r ' + d.r.toFixed(2));
+}
+
 // -------------------------------------------------------------------------------------------- frog
 section('frog');
 function hunt(moving, dist = 40) {
