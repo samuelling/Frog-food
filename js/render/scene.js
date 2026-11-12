@@ -212,7 +212,7 @@ export function buildScene(world, opts = {}) {
 
 // per-frame updates of the shared scene: time of day, droplets, rain, motes
 const _m = new THREE.Matrix4(), _q = new THREE.Quaternion(), _s = new THREE.Vector3(), _p = new THREE.Vector3();
-const DAY = { sun: new THREE.Color('#fff1d0'), sky: new THREE.Color('#86b9a2'), ground: new THREE.Color('#3e3522'), fog: new THREE.Color('#78a08c'), rim: new THREE.Color('#fff4c8') };
+const DAY = { sun: new THREE.Color('#fff1d0'), sky: new THREE.Color('#86b9a2'), ground: new THREE.Color('#5c4c30'), fog: new THREE.Color('#78a08c'), rim: new THREE.Color('#fff4c8') };
 const NIGHT = { sun: new THREE.Color('#5f78b8'), sky: new THREE.Color('#22344a'), ground: new THREE.Color('#0f1414'), fog: new THREE.Color('#16232a'), rim: new THREE.Color('#8fb2ff') };
 export function updateScene(parts, game, camPos, t) {
   const L = game.clock.light;

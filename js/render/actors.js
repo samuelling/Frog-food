@@ -26,7 +26,7 @@ export class FrogView {
     this.frog = frog;
     const skin = TX.frogSkin(frog.species, frog.id * 7 + 3);
     const base = { azureus: '#2f6fd6', auratus: '#2fbf7a', leucomelas: '#f2c21b' }[frog.species];
-    const mSkin = toon({ map: skin, spec: 1.6, shin: 70, wet: 0.85, rim: 0.55, noise: 0.12, noiseScale: 0.08 });
+    const mSkin = toon({ map: skin, spec: 1.6, shin: 70, wet: 0.85, rim: 0.95, noise: 0.12, noiseScale: 0.08, emit: 0.28 });
     const mLeg = toon({ color: frog.species === 'leucomelas' ? '#1a1712' : base, map: frog.species === 'leucomelas' ? null : skin, spec: 1.2, shin: 60, wet: 0.8, rim: 0.5, noise: 0.1 });
     const mEye = toon({ color: '#07080a', spec: 3.0, shin: 180, wet: 1, rim: 0.8, noise: 0 });
     const mPad = toon({ color: frog.species === 'leucomelas' ? '#2a2620' : '#cfd8e8', spec: 0.6, rim: 0.4, trans: 0.6 });

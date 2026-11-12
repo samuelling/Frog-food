@@ -175,6 +175,12 @@ function handleEvents(ev) {
 const _v = new THREE.Vector3();
 function placeCamera(dt) {
   const F = game.fly, e = F.eye;
+  if (game.dead && game.dead.by) {
+    // eaten: hang where the tongue took you, looking into the frog's face as it swallows
+    const d = game.dead, h = d.by.headPos(), k = Math.min(1, (game.simT - d.t) * 0.6);
+    camera.position.set(d.at.x + (h.x - d.at.x) * 0.25 * k, d.at.y + (h.y - d.at.y) * 0.25 * k, d.at.z + (h.z - d.at.z) * 0.25 * k);
+    camera.lookAt(h.x, h.y, h.z); return;
+  }
   if (camY === null) camY = e.y;
   camY += (e.y - camY) * (1 - Math.exp(-dt / (F.onGround ? 0.06 : 0.015)));
   bob += dt * F.speed * 1.4;

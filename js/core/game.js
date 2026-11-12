@@ -71,8 +71,12 @@ export class Game {
    *  realDt: seconds; songNow: the audio clock (seconds) for the song, or undefined to use game time */
   update(realDt, input = {}, songNow) {
     const ev = [];
-    if (this.paused || this.dead || (this.won && this.won.done)) return ev;
+    if (this.paused || (this.won && this.won.done)) return ev;
     realDt = Math.min(realDt, 0.1);
+    if (this.dead) {   // the world goes on for a moment: the frog finishes its swallow
+      if (this.simT - this.dead.t < 5) { const dt = realDt * 0.6; this.simT += dt; for (const f of this.frogs) f.update(dt, [], { lightsOn: this.clock.lightsOn }); }
+      return ev;
+    }
     this.songNow = songNow ?? this.songNow + realDt;
     // bullet time: when a frog fixates you, your fast vision (and the game) slows the world
     const threat = this.frogs.some(f => f.target === this.player && (f.state === 'aim' || f.state === 'strike'));
@@ -178,16 +182,17 @@ export class Game {
       if (e.type === 'kick' && e.male === this.player) { const f = fwdOf(F.yaw); F.pos.x -= f.x * 1.5; F.pos.z -= f.z * 1.5; F.pos.y = this.world.surface(F.pos.x, F.pos.z).y; ev.push({ type: 'kicked' }); }
       if (e.type === 'extrude' && this.court.female === n) this.say('She extrudes her ovipositor at you: a mated female\'s "no".', 'warn', 3);
     }
-    // females hear the air
+    // females hear the air: whichever singers are within earshot of each (two at once scramble each other's IPIs)
+    const rivalFeat = this.rival.alive ? this.rival.song.features(this.songNow) : null;
+    const myOn = this.myFeat.singing || this.myFeat.sinceSong < 0.5, rvOn = this.rival.alive && (this.rival.singing || (rivalFeat && rivalFeat.sinceSong < 0.5));
     for (const f of this.females) {
       if (!f.alive) continue;
-      const dMe = Math.hypot(f.pos.x - F.pos.x, f.pos.z - F.pos.z), dRv = this.rival.alive && this.rival.singing ? Math.hypot(f.pos.x - this.rival.pos.x, f.pos.z - this.rival.pos.z) : Infinity;
-      const myOn = this.myFeat.singing || this.myFeat.sinceSong < 0.5;
-      const d = Math.min(myOn ? dMe : Infinity, dRv);
-      const audible = nearField(d);
+      const dMe = myOn ? Math.hypot(f.pos.x - F.pos.x, f.pos.z - F.pos.z) : Infinity, dRv = rvOn ? Math.hypot(f.pos.x - this.rival.pos.x, f.pos.z - this.rival.pos.z) : Infinity;
+      const aMe = nearField(dMe), aRv = nearField(dRv);
+      const feat = aMe > 0.05 && aRv > 0.05 ? this.airFeat : aRv > aMe ? rivalFeat : this.myFeat;
       const isEar = this.ear.female === f && this.ear.fresh;
       const drive = isEar ? this.ear.drive / DRIVE_FULL : 0.9;          // the Tonnectome for the one being courted
-      f.listen(dt, { drive, audible, feat: this.airFeat });
+      f.listen(dt, { drive, audible: Math.max(aMe, aRv), feat });
     }
     // which female's ears to run: the one being courted, else the nearest within earshot
     const target = this.court.female || this.females.filter(f => f.alive).sort((a, b) => Math.hypot(a.pos.x - F.pos.x, a.pos.z - F.pos.z) - Math.hypot(b.pos.x - F.pos.x, b.pos.z - F.pos.z))[0] || null;
@@ -266,7 +271,7 @@ export class Game {
     this.say(F.ground === 'dish' ? 'Climb onto the banana to feed.' : 'Nothing to do here. (E drinks at a droplet, feeds on fruit, taps a female.)', 'hint', 2);
   }
 
-  _die(cause, text, ev, by) { this.dead = { cause, text, by, t: this.simT, age: this.clock.ageText }; this.player.alive = false; ev.push({ type: 'death', cause, text }); return ev; }
+  _die(cause, text, ev, by) { this.dead = { cause, text, by, t: this.simT, age: this.clock.ageText, at: { ...this.fly.eye }, yaw: this.fly.yaw, pitch: this.fly.pitch }; this.player.alive = false; ev.push({ type: 'death', cause, text }); return ev; }
 
   _restock(ev) {
     const virgins = this.females.filter(f => f.alive && !f.mated && !f.copulating).length;

@@ -51,8 +51,20 @@ if (!only || only.includes('court')) {
 }
 await shot('dish', () => { const g = window.FrogFood.game, F = g.fly, D = g.world.dish; F.pos.x = D.x - 45; F.pos.z = D.z + 25; F.pos.y = g.world.height(F.pos.x, F.pos.z); F.yaw = Math.atan2(-(D.x - F.pos.x), -(D.z - F.pos.z)); F.pitch = 0.1; });
 await shot('bromeliad', () => { const g = window.FrogFood.game, F = g.fly, B = g.world.bromeliads[0]; F.pos.x = B.x - 140; F.pos.z = B.z + 90; F.pos.y = g.world.height(F.pos.x, F.pos.z); F.yaw = Math.atan2(-(B.x - F.pos.x), -(B.z - F.pos.z)); F.pitch = 0.45; });
-await shot('night', () => { const g = window.FrogFood.game; g.clock.t += 180 * 0.55; });
-await shot('eyeview', () => { const g = window.FrogFood.game; g.clock.t -= 180 * 0.55; window.dispatchEvent(new KeyboardEvent('keydown', { key: 'v' })); window.dispatchEvent(new KeyboardEvent('keyup', { key: 'v' })); });
+await shot('aim', () => { const g = window.FrogFood.game, F = g.fly, f = g.frogs[0]; F.pos.x = 0; F.pos.z = -16; F.pos.y = g.world.height(0, -16); F.onGround = true; F.yaw = Math.PI; F.pitch = 0.25; f.pos.x = 0; f.pos.z = 0; f.pos.y = g.world.height(0, 0); f.yaw = 0; f.state = 'aim'; f.target = g.player; f.timer = 0.45; f.hunger = 1; }, 700);
+await shot('strike', null, 1150);
+await shot('mist', () => { const g = window.FrogFood.game, F = g.fly; if (g.dead) { g.dead = null; g.player.alive = true; } F.trapped = null; F.pos.x = -40; F.pos.z = 20; F.pos.y = g.world.height(-40, 20); F.onGround = true; F.pitch = 0.5; g.frogs.forEach(f => { f.pos.x = 200; f.pos.z = -200; f.state = 'rest'; f.timer = 999; f.target = null; }); g.clock.t = (0.552 - g.clock.start) * 180; }, 2500);
+await shot('night', () => { const g = window.FrogFood.game; g.clock.t = (0.92 - g.clock.start) * 180; });
+await shot('eyeview', () => { const g = window.FrogFood.game; g.clock.t = (0.45 - g.clock.start) * 180; window.dispatchEvent(new KeyboardEvent('keydown', { key: 'v' })); window.dispatchEvent(new KeyboardEvent('keyup', { key: 'v' })); });
+if (!only || only.includes('mobile')) {
+  const mp = await browser.newPage();
+  mp.on('pageerror', e => errors.push('mobile pageerror: ' + e.message));
+  await mp.emulate({ viewport: { width: 844, height: 390, isMobile: true, hasTouch: true, deviceScaleFactor: 2 }, userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1' });
+  await mp.goto(`http://localhost:${port}/index.html`, { waitUntil: 'load' });
+  await new Promise(r => setTimeout(r, 2500)); await mp.screenshot({ path: ROOT + 'shots/mobile-start.png' });
+  await mp.tap('#go'); await new Promise(r => setTimeout(r, 3000)); await mp.screenshot({ path: ROOT + 'shots/mobile-play.png' }); console.log('shot mobile');
+  await mp.close();
+}
 const stats = await page.evaluate(() => { const g = window.FrogFood.game, r = window.FrogFood.renderer.info; const fr = window.FrogFood.flyharp.latest; return { calls: r.render.calls, tris: r.render.triangles, ear: g.ear.fresh, earDrive: g.ear.drive, frame: fr ? { n: fr.lum.length, mean: fr.lum.reduce((a, b) => a + b, 0) / fr.lum.length } : null, summary: g.summary() }; });
 console.log(JSON.stringify(stats));
 console.log('errors:', errors.length); for (const e of errors.slice(0, 20)) console.log('  ' + e.slice(0, 400));

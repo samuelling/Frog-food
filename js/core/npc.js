@@ -148,16 +148,16 @@ export class RivalMale extends NpcFly {
   constructor(world, opts = {}) {
     super(world, { ...opts, sex: 'm' });
     this.song = new SongAdapter(opts.seed ?? 77); this.song.setCondition({ jitter: 0.003, amp: 0.8 });
-    this.target = null; this.deterred = 0; this.nextTap = 0; this.singing = false; this.tempo = 0.38 + this.rand() * 0.03; this.courting = false;
+    this.target = null; this.deterred = 0; this.nextTap = 0; this.singing = false; this.tempo = 0.40 + this.rand() * 0.04; this.courting = false; this.age = 0;
   }
   update(dt, ctx) {
     if (!this.alive) return [];
     const ev = [];
-    this.deterred = Math.max(0, this.deterred - dt);
+    this.deterred = Math.max(0, this.deterred - dt); this.age += dt;
     const cands = ctx.females.filter(f => f.alive && !f.mated && !f.copulating);
     if (!this.target || !cands.includes(this.target)) this.target = cands.sort((a, b) => Math.hypot(a.pos.x - this.pos.x, a.pos.z - this.pos.z) - Math.hypot(b.pos.x - this.pos.x, b.pos.z - this.pos.z))[0] || null;
     const t = this.target, d = t ? Math.hypot(t.pos.x - this.pos.x, t.pos.z - this.pos.z) : Infinity;
-    this.courting = !!t && d < 70 && this.deterred <= 0 && ctx.lightsOn !== false;
+    this.courting = !!t && d < 70 && this.deterred <= 0 && ctx.lightsOn !== false && this.age > 60;   // he too arrives dusty: a minute's grace
     if (this.state === 'flee' || !this.courting) {
       if (this.deterred > 0 && t) { const dx = this.pos.x - t.pos.x, dz = this.pos.z - t.pos.z, l = Math.hypot(dx, dz) || 1; this._steer({ x: this.pos.x + dx / l * 10, z: this.pos.z + dz / l * 10 }, dt, d < 40 ? PHYS.run * 0.7 : 0); }
       else this.baseUpdate(dt, ctx);
@@ -169,7 +169,7 @@ export class RivalMale extends NpcFly {
       if (dd < 1.5) { const dy = wrapAngle(Math.atan2(-(t.pos.x - this.pos.x), -(t.pos.z - this.pos.z)) - this.yaw); this.yaw += clamp(dy, -6 * dt, 6 * dt); }
       if (!t.courtedBy || t.courtedBy === this || Math.hypot(t.courtedBy.pos.x - t.pos.x, t.courtedBy.pos.z - t.pos.z) > d) t.courtedBy = this;
       this.singing = d < 8;
-      if (this.singing && ctx.songNow >= this.nextTap) { this.song.tap(ctx.songNow); this.nextTap = ctx.songNow + this.tempo + (this.rand() - 0.5) * 0.05; if (this.rand() < 0.08) this.nextTap += 0.6; }
+      if (this.singing && ctx.songNow >= this.nextTap) { this.song.tap(ctx.songNow); this.nextTap = ctx.songNow + this.tempo + (this.rand() - 0.5) * 0.05; if (this.rand() < 0.12) this.nextTap += 0.8; }
       // attempt copulation once she has opened
       if (t.vpo > 0.7 && d < 3.5) { t.copulating = this; t.copT = 0; ev.push({ type: 'rival-copulates', female: t }); }
     }

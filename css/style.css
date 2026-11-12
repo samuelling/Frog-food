@@ -90,3 +90,9 @@ body.touch #hud-life { transform: scale(.85); transform-origin: top left; }
 body.touch #hud-court, body.touch #hud-groom { bottom: auto; top: 70px; transform: translateX(-50%) scale(.85); transform-origin: top center; }
 body.touch #eyepip { bottom: auto; top: 180px; width: 120px; height: 120px; }
 @media (max-width: 700px) { #hud-missions { display: none; } .cols { grid-template-columns: 1fr; } }
+
+.card { touch-action: pan-y; -webkit-overflow-scrolling: touch; }
+.touch-only { display: none; } body.touch .touch-only { display: block; } body.touch .desk-only { display: none; }
+body.touch #toasts { top: auto; bottom: 150px; width: min(520px, 60vw); } body.touch #toasts div { font-size: 12px; padding: 3px 8px; }
+body.touch #prompt { top: 46%; font-size: 13px; }
+@media (max-height: 500px) { .card { padding: 14px 18px; } .card h1 { font-size: 28px; } .card .lede { font-size: 14px; } .controls { font-size: 12px; } }

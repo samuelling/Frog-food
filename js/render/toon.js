@@ -89,7 +89,7 @@ void main() {
   // soft cel ramp: shadow, mid, lit
   float lit = smoothstep(-0.08, 0.06, ndl) * 0.55 + smoothstep(0.42, 0.56, ndl) * 0.45;
   vec3 amb = mix(groundCol, skyCol, N.y * 0.5 + 0.5);
-  vec3 col = base * (amb * 0.85 + sunCol * lit * uLight);
+  vec3 col = base * (amb * 1.0 + sunCol * lit * uLight);
   // backlit translucency (leaves, frog toe webbing): light coming through towards the viewer
   float back = pow(max(dot(-V, sunDir), 0.0), 2.0) * smoothstep(0.2, -0.4, ndl);
   col += uTransCol * base * uTrans * back * 2.2 * uLight;
