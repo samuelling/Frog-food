@@ -1,0 +1,13 @@
+{
+  "name": "frogfood",
+  "private": true,
+  "type": "module",
+  "description": "FrogFood: a short life as a flightless male fruit fly in a dart-frog vivarium. Static site, no build step.",
+  "scripts": {
+    "test": "node tools/test.mjs",
+    "smoke": "node tools/smoke.mjs"
+  },
+  "devDependencies": {
+    "puppeteer-core": "^24.0.0"
+  }
+}
